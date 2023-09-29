@@ -136,7 +136,7 @@ export const AuthProvider = (props) => {
   };
 
   const register = async (email, name, password) => {
-    const accessToken = await authApi.register({ email, name, password });
+    const accessToken = await authApi.register({ mobile, email, name, password });
     const user = await authApi.me(accessToken);
 
     localStorage.setItem('accessToken', accessToken);

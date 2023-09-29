@@ -19,40 +19,22 @@ class AuthApi {
   }
   }
 
-  async register({ email, name, password }) {
-    await wait(1000);
+  async register({ mobile, email, name, password }) {
 
-    return new Promise((resolve, reject) => {
-      try {
-        // Check if a user already exists
-        let user = users.find((_user) => _user.email === email);
+    try {
+      const response = await axios.post(`/api/user/token/`, {
+        mobile,
+        email,
+        name,
+        password,
+      });
+      console.log(response)
 
-        if (user) {
-          reject(new Error("User already exists"));
-          return;
-        }
-
-        user = {
-          id: createResourceId(),
-          avatar: null,
-          email,
-          name,
-          password,
-          plan: "Standard",
-        };
-
-        users.push(user);
-
-        const accessToken = sign({ userId: user.id }, JWT_SECRET, {
-          expiresIn: JWT_EXPIRES_IN,
-        });
-
-        resolve(accessToken);
-      } catch (err) {
-        console.error("[Auth Api]: ", err);
-        reject(new Error("Internal server error"));
-      }
-    });
+      return response.data.token;
+    } catch (err)  {
+      console.error("[Auth Api]: ", err);
+      return(new Error("Internal server error"));
+    }
   }
 
   async me() {

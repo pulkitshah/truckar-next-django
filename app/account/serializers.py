@@ -11,11 +11,13 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ['id','name','onBoardingRequired','orderExpensesSettings','lrSettings','taxOptions','lrFormat','invoiceFormat','is_active']
+        fields = ['id', 'name', 'onBoardingRequired', 'lrSettings',
+                  'taxOptions', 'lrFormat', 'invoiceFormat', 'is_active']
         read_only_fields = ['id']
+
 
 class AccountDetailSerializer(AccountSerializer):
     """Serializer for account detail view."""
 
     class Meta(AccountSerializer.Meta):
-        fields = AccountSerializer.Meta.fields + ['city']
+        fields = AccountSerializer.Meta.fields + ['orderExpensesSettings']

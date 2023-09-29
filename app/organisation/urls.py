@@ -12,11 +12,10 @@ from organisation import views
 
 
 router = DefaultRouter()
-router.register('organisations', views.OrganisationViewSet)
+router.register('', views.OrganisationViewSet)
 
 app_name = 'organisation'
 
 urlpatterns = [
     path('', include(router.urls)),
 ]
-

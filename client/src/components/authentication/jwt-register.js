@@ -18,6 +18,11 @@ export const JWTRegister = (props) => {
       submit: null
     },
     validationSchema: Yup.object({
+      mobile: Yup
+        .number().integer()
+        .max(9999999999,'Mobile Number is not valid')
+        .min(6000000000,'Mobile Number is not valid')
+        .required('Name is required'),
       email: Yup
         .string()
         .email('Must be a valid email')
@@ -71,6 +76,17 @@ export const JWTRegister = (props) => {
         onBlur={formik.handleBlur}
         onChange={formik.handleChange}
         value={formik.values.name}
+      />
+      <TextField
+        error={Boolean(formik.touched.mobile && formik.errors.mobile)}
+        fullWidth
+        helperText={formik.touched.mobile && formik.errors.mobile}
+        label="Mobile"
+        margin="normal"
+        name="mobile"
+        onBlur={formik.handleBlur}
+        onChange={formik.handleChange}
+        value={formik.values.mobile}
       />
       <TextField
         error={Boolean(formik.touched.email && formik.errors.email)}

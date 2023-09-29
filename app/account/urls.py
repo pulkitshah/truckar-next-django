@@ -12,11 +12,10 @@ from account import views
 
 
 router = DefaultRouter()
-router.register('accounts', views.AccountViewSet)
+router.register('', views.AccountViewSet)
 
 app_name = 'account'
 
 urlpatterns = [
     path('', include(router.urls)),
 ]
-
