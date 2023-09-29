@@ -6,44 +6,75 @@ import { wait } from "../utils/wait";
 class AuthApi {
   async login({ email, password }) {
     try {
-    const response = await axios.post(`/api/user/token/`, {
-      email,
-      password,
-    });
-    console.log(response)
+      const response = await axios.post(`/api/user/token/`, {
+        email,
+        password,
+      });
 
-    return response.data.token;
-  } catch (err)  {
-    console.error("[Auth Api]: ", err);
-    return(new Error("Internal server error"));
-  }
+      return {
+        status: response.status,
+        data: response.data.token,
+        error: false,
+      };
+    } catch (err) {
+      console.error("[Auth Api]: ", err);
+      if (err) {
+        return {
+          status: 400,
+          data: err,
+          error: "The email or password is wrong. Please check and try again. ",
+        };
+      }
+    }
   }
 
   async register({ mobile, email, name, password }) {
-
     try {
-      const response = await axios.post(`/api/user/token/`, {
+      const response = await axios.post(`/api/user/create/`, {
         mobile,
         email,
         name,
         password,
       });
-      console.log(response)
 
-      return response.data.token;
-    } catch (err)  {
+      return {
+        status: response.status,
+        data: response.data,
+        error: false,
+      };
+    } catch (err) {
       console.error("[Auth Api]: ", err);
-      return(new Error("Internal server error"));
+      if (err.email) {
+        return {
+          status: err.status,
+          data: err,
+          error:
+            "This email id is already registered. Please try a different email.",
+        };
+      }
     }
   }
 
   async me() {
     try {
       const response = await axios.get(`/api/user/me/`);
-      return response.data;
-    } catch (err)  {
+
+      return {
+        status: response.status,
+        data: response.data,
+        error: false,
+      };
+
+      // return response.data;
+    } catch (err) {
       console.error("[Auth Api]: ", err);
-      return(new Error("Internal server error"));
+      if (err.detail) {
+        return {
+          status: err.status,
+          data: err,
+          error: "This token is invalid. Please log in again",
+        };
+      }
     }
   }
 }

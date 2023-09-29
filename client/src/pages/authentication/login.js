@@ -4,10 +4,6 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { Box, Card, Container, Divider, Link, Typography } from "@mui/material";
 import { GuestGuard } from "../../components/authentication/guest-guard";
-import { AuthBanner } from "../../components/authentication/auth-banner";
-import { AmplifyLogin } from "../../components/authentication/amplify-login";
-import { Auth0Login } from "../../components/authentication/auth0-login";
-import { FirebaseLogin } from "../../components/authentication/firebase-login";
 import { JWTLogin } from "../../components/authentication/jwt-login";
 import { Logo } from "../../components/logo";
 import { useAuth } from "../../hooks/use-auth";
@@ -43,7 +39,6 @@ const Login = () => {
           minHeight: "100vh",
         }}
       >
-        <AuthBanner />
         <Container
           maxWidth="sm"
           sx={{
@@ -53,33 +48,6 @@ const Login = () => {
             },
           }}
         >
-          <Box
-            sx={{
-              alignItems: "center",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark" ? "neutral.900" : "neutral.100",
-              borderColor: "divider",
-              borderRadius: 1,
-              borderStyle: "solid",
-              borderWidth: 1,
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              mb: 4,
-              p: 2,
-              "& > img": {
-                height: 32,
-                width: "auto",
-                flexGrow: 0,
-                flexShrink: 0,
-              },
-            }}
-          >
-            <Typography color="textSecondary" variant="caption">
-              The app authenticates via {platform}
-            </Typography>
-            <img alt="Auth platform" src={platformIcons[platform]} />
-          </Box>
           <Card elevation={16} sx={{ p: 4 }}>
             <Box
               sx={{
@@ -110,9 +78,6 @@ const Login = () => {
                 mt: 3,
               }}
             >
-              {platform === "Amplify" && <AmplifyLogin />}
-              {platform === "Auth0" && <Auth0Login />}
-              {platform === "Firebase" && <FirebaseLogin />}
               {platform === "JWT" && <JWTLogin />}
             </Box>
             <Divider sx={{ my: 3 }} />

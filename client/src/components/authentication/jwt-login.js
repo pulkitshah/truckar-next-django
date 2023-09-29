@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import toast from "react-hot-toast";
 import { Alert, Box, Button, FormHelperText, TextField } from "@mui/material";
 import { useAuth } from "../../hooks/use-auth";
 import { useMounted } from "../../hooks/use-mounted";
@@ -11,8 +12,8 @@ export const JWTLogin = (props) => {
   const { login } = useAuth();
   const formik = useFormik({
     initialValues: {
-      email: "demo@devias.io",
-      password: "Password123!",
+      email: "",
+      password: "",
       submit: null,
     },
     validationSchema: Yup.object({
@@ -23,11 +24,19 @@ export const JWTLogin = (props) => {
       password: Yup.string().max(255).required("Password is required"),
     }),
     onSubmit: async (values, helpers) => {
+      helpers.setSubmitting(true);
       try {
-        await login(values.email, values.password);
-        if (isMounted()) {
-          const returnUrl = router.query.returnUrl || "/dashboard";
-          router.push(returnUrl);
+        const response = await login(values.email, values.password);
+
+        if (response.status === 200) {
+          if (isMounted()) {
+            const returnUrl = router.query.returnUrl || "/dashboard";
+            router.push(returnUrl);
+          }
+        } else {
+          console.error(response.error);
+          toast.error(response.error);
+          helpers.setErrors({ submit: response.error });
         }
       } catch (err) {
         if (isMounted()) {
@@ -81,13 +90,6 @@ export const JWTLogin = (props) => {
         >
           Log In
         </Button>
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Alert severity="info">
-          <div>
-            Use <b>demo@devias.io</b> and password <b>Password123!</b>
-          </div>
-        </Alert>
       </Box>
     </form>
   );

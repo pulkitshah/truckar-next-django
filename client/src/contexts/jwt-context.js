@@ -1,23 +1,22 @@
-import { createContext, useEffect, useReducer } from 'react';
-import PropTypes from 'prop-types';
-import { authApi } from '../api/auth-api';
-import axios from '../utils/axios';
-
+import { createContext, useEffect, useReducer } from "react";
+import PropTypes from "prop-types";
+import { authApi } from "../api/auth-api";
+import axios from "../utils/axios";
 
 const initialState = {
   isAuthenticated: false,
   isInitialized: false,
-  user: null
+  user: null,
 };
 
-const setSession = accessToken => {
-  console.log(`Token ${accessToken}`);
+const setSession = (accessToken) => {
   if (accessToken) {
-    localStorage.setItem('accessToken', accessToken);
-    axios.defaults.headers.common['Authorization'] = `Token ${accessToken}`;
+    // console.log(`Token ${accessToken}`);
+    localStorage.setItem("accessToken", accessToken);
+    axios.defaults.headers.common["Authorization"] = `Token ${accessToken}`;
   } else {
-    localStorage.removeItem('accessToken');
-    delete axios.defaults.headers.common['x-auth-token'];
+    localStorage.removeItem("accessToken");
+    delete axios.defaults.headers.common["x-auth-token"];
   }
 };
 
@@ -29,7 +28,7 @@ const handlers = {
       ...state,
       isAuthenticated,
       isInitialized: true,
-      user
+      user,
     };
   },
   LOGIN: (state, action) => {
@@ -38,13 +37,13 @@ const handlers = {
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,
     };
   },
   LOGOUT: (state) => ({
     ...state,
     isAuthenticated: false,
-    user: null
+    // user: null,
   }),
   REGISTER: (state, action) => {
     const { user } = action.payload;
@@ -52,21 +51,20 @@ const handlers = {
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,
     };
-  }
+  },
 };
 
-const reducer = (state, action) => (handlers[action.type]
-  ? handlers[action.type](state, action)
-  : state);
+const reducer = (state, action) =>
+  handlers[action.type] ? handlers[action.type](state, action) : state;
 
 export const AuthContext = createContext({
   ...initialState,
-  platform: 'JWT',
+  platform: "JWT",
   login: () => Promise.resolve(),
   logout: () => Promise.resolve(),
-  register: () => Promise.resolve()
+  register: () => Promise.resolve(),
 });
 
 export const AuthProvider = (props) => {
@@ -75,38 +73,40 @@ export const AuthProvider = (props) => {
 
   useEffect(() => {
     const initialize = async () => {
-      try {
-        const accessToken = window.localStorage.getItem('accessToken');
+      const accessToken = window.localStorage.getItem("accessToken");
 
-        if (accessToken) {
-          setSession(accessToken);
+      if (accessToken) {
+        setSession(accessToken);
+        const response = await authApi.me();
+        console.log(response);
 
-          const user = await authApi.me();
-          console.log(user)
+        if (response.status === 200) {
+          const user = response.data;
           dispatch({
-            type: 'INITIALIZE',
+            type: "INITIALIZE",
             payload: {
               isAuthenticated: true,
-              user
-            }
+              user,
+            },
           });
         } else {
+          setSession(null);
           dispatch({
-            type: 'INITIALIZE',
+            type: "INITIALIZE",
             payload: {
               isAuthenticated: false,
-              user: null
-            }
+              user: null,
+            },
           });
         }
-      } catch (err) {
-        console.error(err);
+      } else {
+        setSession(null);
         dispatch({
-          type: 'INITIALIZE',
+          type: "INITIALIZE",
           payload: {
             isAuthenticated: false,
-            user: null
-          }
+            user: null,
+          },
         });
       }
     };
@@ -115,48 +115,58 @@ export const AuthProvider = (props) => {
   }, []);
 
   const login = async (email, password) => {
-    const accessToken = await authApi.login({ email, password });
-    setSession(accessToken);
-    localStorage.setItem('accessToken', accessToken);
+    const response = await authApi.login({ email, password });
 
-    const user = await authApi.me();
+    if (response.status === 200) {
+      setSession(response.data);
+      localStorage.setItem("accessToken", response.data);
 
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        user
+      const response2 = await authApi.me();
+
+      if (response2.status === 200) {
+        const user = response2.data;
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            user,
+          },
+        });
+      } else {
+        setSession(null);
+        dispatch({
+          type: "INITIALIZE",
+          payload: {
+            isAuthenticated: false,
+            user: null,
+          },
+        });
       }
-    });
+    }
+    return response;
   };
 
   const logout = async () => {
-    localStorage.removeItem('accessToken');
-    setSession(null);
-    dispatch({ type: 'LOGOUT' });
+    localStorage.removeItem("accessToken");
+    dispatch({ type: "LOGOUT" });
   };
 
-  const register = async (email, name, password) => {
-    const accessToken = await authApi.register({ mobile, email, name, password });
-    const user = await authApi.me(accessToken);
+  const register = async (mobile, email, name, password) => {
+    const response = await authApi.register({ mobile, email, name, password });
 
-    localStorage.setItem('accessToken', accessToken);
-    setSession(accessToken);
-    dispatch({
-      type: 'REGISTER',
-      payload: {
-        user
-      }
-    });
+    if (response.status === 201) {
+      await login(email, password);
+    }
+    return response;
   };
 
   return (
     <AuthContext.Provider
       value={{
         ...state,
-        platform: 'JWT',
+        platform: "JWT",
         login,
         logout,
-        register
+        register,
       }}
     >
       {children}
@@ -165,7 +175,7 @@ export const AuthProvider = (props) => {
 };
 
 AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
 export const AuthConsumer = AuthContext.Consumer;
