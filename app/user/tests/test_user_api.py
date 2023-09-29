@@ -31,6 +31,7 @@ class PublicUserApiTests(TestCase):
             'email': 'test@example.com',
             'password': 'testpass123',
             'name': 'Test Name',
+            'mobile': '9769480620',
         }
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -125,6 +126,7 @@ class PrivateUserApiTests(TestCase):
             email='test@example.com',
             password='testpass123',
             name='Test Name',
+            mobile='9769480620'
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -137,6 +139,7 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.data, {
             'name': self.user.name,
             'email': self.user.email,
+            'mobile': self.user.mobile,
         })
 
     def test_post_me_not_allowed(self):
